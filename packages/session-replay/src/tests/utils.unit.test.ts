@@ -8,7 +8,7 @@ import {
   isURL,
   deprecationWarn,
   getLabelAttribute,
-  hasOpenreplayAttribute,
+  hasSonarlyAttribute,
   canAccessIframe,
   generateRandomId,
   ngSafeBrowserMethod,
@@ -124,7 +124,7 @@ describe('getLabelAttribute', () => {
   })
 })
 
-describe('hasOpenreplayAttribute', () => {
+describe('hasSonarlyAttribute', () => {
   let consoleWarnSpy: jest.SpiedFunction<(args: any) => void>
 
   beforeEach(() => {
@@ -138,7 +138,7 @@ describe('hasOpenreplayAttribute', () => {
   test('returns true and prints a deprecation warning for a deprecated openreplay attribute', () => {
     const element = document.createElement('div')
     element.setAttribute('data-openreplay-htmlmasked', 'true')
-    const result = hasOpenreplayAttribute(element, 'htmlmasked')
+    const result = hasSonarlyAttribute(element, 'htmlmasked')
     expect(result).toBe(true)
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       'OpenReplay: "data-openreplay-htmlmasked" attribute is deprecated. Please, use "hidden" attribute instead. Visit https://docs.openreplay.com/en/sdk/sanitize-data for more information.',
@@ -147,7 +147,7 @@ describe('hasOpenreplayAttribute', () => {
 
   test('returns false for a non-existent openreplay attribute', () => {
     const element = document.createElement('div')
-    const result = hasOpenreplayAttribute(element, 'nonexistent')
+    const result = hasSonarlyAttribute(element, 'nonexistent')
     expect(result).toBe(false)
     expect(consoleWarnSpy).not.toHaveBeenCalled()
   })

@@ -8,6 +8,14 @@ import * as _Messages from './app/messages.gen.js'
 export const Messages = _Messages
 export { SanitizeLevel } from './app/sanitizer.js'
 
+// Export network sanitizer utilities
+export {
+  createSmartSanitizer,
+  createCustomSanitizer,
+  SmartSanitizerPresets,
+  type SmartSanitizerOptions,
+} from './modules/networkSanitizer.js'
+
 import Connection from './modules/connection.js'
 import Console from './modules/console.js'
 import Exception, {

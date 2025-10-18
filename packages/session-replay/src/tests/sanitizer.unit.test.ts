@@ -40,7 +40,7 @@ describe('Sanitizer', () => {
 
   test('should handle node and mark it as obscured if it has "masked" or "obscured" attribute', () => {
     const node = document.createElement('div')
-    node.setAttribute('data-openreplay-obscured', '')
+    node.setAttribute('data-sonarly-obscured', '')
     sanitizer.handleNode(1, 2, node)
     expect(sanitizer.isObscured(1)).toBe(true)
   })
@@ -53,7 +53,7 @@ describe('Sanitizer', () => {
 
   test('should handle node and mark it as hidden if it has "htmlmasked" or "hidden" attribute', () => {
     const node = document.createElement('div')
-    node.setAttribute('data-openreplay-hidden', '')
+    node.setAttribute('data-sonarly-hidden', '')
     sanitizer.handleNode(1, 2, node)
     expect(sanitizer.isHidden(1)).toBe(true)
   })

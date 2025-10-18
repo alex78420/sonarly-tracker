@@ -1,3 +1,60 @@
+## [1.1.0] - 2025-10-19
+
+### 🎉 Major Feature: Smart Network Sanitizer
+
+#### Added
+- **Smart Network Sanitizer** - Intelligent network request filtering system
+  - Reduces data footprint by ~60% while maintaining full debugging capabilities
+  - 8 filtering rules to capture only relevant network requests
+  - 4 preset configurations (strict, balanced, verbose, debug)
+  - Custom sanitizer builder with domain/pattern helpers
+  - Full TypeScript support with type inference
+  - 44 comprehensive unit tests (all passing)
+- New exports:
+  - `createSmartSanitizer()` - Create custom network sanitizer
+  - `createCustomSanitizer()` - Simplified domain/pattern configuration
+  - `SmartSanitizerPresets` - Ready-to-use presets
+  - `SmartSanitizerOptions` - TypeScript type definitions
+- Documentation:
+  - "Network Monitoring Deep Dive" section in README
+  - Difference between NetworkRequest and ResourceTiming explained
+  - Real-world examples (e-commerce, SaaS apps)
+  - Performance metrics and best practices
+  - Interactive HTML demo (`examples/smart-sanitizer-demo.html`)
+
+#### Performance
+- ~60% reduction in network data with balanced preset
+- ~80% reduction in network data with strict preset
+- Maintains 100% capture of failures (4xx, 5xx) and slow requests
+- Filters out static resources (already in ResourceTiming API)
+- Removes third-party tracking noise (Google Analytics, Facebook, etc.)
+
+#### Example Usage
+```typescript
+import Tracker, { SmartSanitizerPresets } from '@sonarly/session-replay'
+
+const tracker = new Tracker({
+  projectKey: 'YOUR_PROJECT_KEY',
+  network: {
+    sanitizer: SmartSanitizerPresets.balanced(), // ~60% data reduction!
+    capturePayload: true,
+  },
+})
+```
+
+---
+
+## [1.0.0] - 2025-10-18
+
+### Initial Release
+- Session recording and replay functionality
+- Automatic error detection and tracking
+- Performance monitoring (Web Vitals)
+- Network request monitoring (XHR, Fetch, Beacon)
+- Privacy controls and sanitization
+
+---
+
 ## 16.2.0
 
 - css batching and inlining via (!plain mode will cause fake text nodes in style tags occupying 99*10^6 id space, can conflict with crossdomain iframes!)

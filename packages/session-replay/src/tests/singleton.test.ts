@@ -2,7 +2,7 @@ import { describe, expect, test, jest, beforeAll, afterAll } from '@jest/globals
 import singleton from "../main/singleton";
 
 jest.mock('@medv/finder', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
-jest.mock('@openreplay/network-proxy', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
+jest.mock('@sonarly/network-proxy', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
 
 const methods = [
   'onFlagsLoad',

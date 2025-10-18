@@ -13,7 +13,7 @@ const conditions: string[] = [
 ]
 
 jest.mock('@medv/finder', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
-jest.mock('@openreplay/network-proxy', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
+jest.mock('@sonarly/network-proxy', () => ({ default: jest.fn(() => 'mocked network-proxy content') }));
 // jest.mock('../main/modules/network', () => jest.fn(() => 'mocked network content'));
 
 describe('Constructor Tests', () => {

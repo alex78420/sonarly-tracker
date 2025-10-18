@@ -1,7 +1,7 @@
 {
   "name": "@sonarly/session-replay",
   "description": "Session replay and user monitoring SDK. Record, replay and analyze user sessions with automatic error detection, performance monitoring, and heatmaps.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "logging",
     "session-replay",
@@ -21,9 +21,10 @@
     "dead-clicks",
     "debugging"
   ],
-  "author": "Sonarly Team <contact@sonarly.dev>",
+  "author": "Sonarly Team <founders@sonarly.dev>",
   "contributors": [
-    "Sonarly Contributors"
+    "Alexandre Klobb",
+    "Dimittri choudhury"
   ],
   "license": "MIT",
   "type": "module",
@@ -55,11 +56,12 @@
   "types": "./dist/lib/main/entry.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sonarly/session-replay"
+    "url": "https://github.com/alex78420/sonarly-tracker",
+    "directory": "packages/session-replay"
   },
-  "homepage": "https://sonarly.dev",
+  "homepage": "https://github.com/alex78420/sonarly-tracker/tree/main/packages/session-replay",
   "bugs": {
-    "url": "https://github.com/sonarly/session-replay/issues"
+    "url": "https://github.com/alex78420/sonarly-tracker/issues"
   },
   "scripts": {
     "lint": "eslint src --ext .ts,.js --fix --quiet",
