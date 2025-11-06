@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Network Sanitizer Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #da190b;
+    }
+    .log {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #4CAF50;
+      padding-left: 10px;
+    }
+    .log-entry.captured {
+      border-left-color: #4CAF50;
+      background: #e8f5e9;
+    }
+    .log-entry.ignored {
+      border-left-color: #ff9800;
+      background: #fff3e0;
+    }
+    .log-entry.failure {
+      border-left-color: #f44336;
+      background: #ffebee;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .stat {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    .stat-label {
+      color: #666;
+      margin-top: 5px;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Smart Network Sanitizer - Live Demo</h1>
+  
+  <div class="container">
+    <h2>Test Requests</h2>
+    <p>Click buttons below to make various network requests and see which ones get captured by the sanitizer.</p>
+    
+    <div>
+      <h3>✅ Should be CAPTURED</h3>
+      <button onclick="testRequest('https://jsonplaceholder.typicode.com/posts', 'GET', 'API call')">
+        API Call (GET /posts)
+      </button>
+      <button onclick="testRequest('https://jsonplaceholder.typicode.com/posts', 'POST', 'POST mutation')">
+        POST Request (Mutation)
+      </button>
+      <button onclick="testRequest('https://jsonplaceholder.typicode.com/posts/999999', 'GET', '404 error')">
+        404 Not Found (Failure)
+      </button>
+    </div>
+    
+    <div>
+      <h3>❌ Should be IGNORED</h3>
+      <button class="danger" onclick="testRequest('https://www.google-analytics.com/collect', 'GET', 'Google Analytics')">
+        Google Analytics
+      </button>
+      <button class="danger" onclick="testRequest('https://cdn.example.com/app.js', 'GET', 'Static JS')">
+        Static JS File
+      </button>
+      <button class="danger" onclick="testRequest('https://fonts.googleapis.com/css?family=Roboto', 'GET', 'Google Fonts')">
+        Google Fonts CSS
+      </button>
+    </div>
+    
+    <div>
+      <h3>📊 Mixed Scenarios</h3>
+      <button onclick="simulateCheckoutFlow()">
+        Simulate E-commerce Checkout
+      </button>
+      <button onclick="clearLog()">
+        Clear Log
+      </button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h2>Statistics</h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="total-requests">0</div>
+        <div class="stat-label">Total Requests</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="captured-requests">0</div>
+        <div class="stat-label">Captured</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="ignored-requests">0</div>
+        <div class="stat-label">Ignored</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="data-reduction">0%</div>
+        <div class="stat-label">Data Reduction</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h2>Activity Log</h2>
+    <div class="log" id="log">
+      <div style="color: #666; text-align: center; padding: 20px;">
+        Click buttons above to test the sanitizer. Results will appear here.
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    // This would normally be: import { createSmartSanitizer } from '@sonarly/session-replay'
+    // For demo purposes, we'll create a mock sanitizer with the same logic
+    
+    const mockSmartSanitizer = {
+      slowRequestThreshold: 2000,
+      errorStatusThreshold: 400,
+      ignoredDomains: [
+        'google-analytics.com',
+        'googletagmanager.com',
+        'facebook.com',
+        'twitter.com',
+        'hotjar.com',
+        'googleapis.com',
+      ],
+      apiPatterns: ['/api/', '/graphql', '/v1/', '/posts', '/users'],
+      ignoredExtensions: ['.js', '.css', '.png', '.jpg', '.svg', '.woff', '.woff2'],
+      ownDomains: ['jsonplaceholder.typicode.com'], // Our test API
+    }
+    
+    function shouldCapture(url, method, status) {
+      // Rule 1: Always capture failures
+      if (status >= mockSmartSanitizer.errorStatusThreshold) {
+        return { captured: true, reason: 'Failure (status >= 400)' }
+      }
+      
+      // Rule 3: Ignore static resources
+      const hasIgnoredExtension = mockSmartSanitizer.ignoredExtensions.some(ext => 
+        url.toLowerCase().endsWith(ext)
+      )
+      if (hasIgnoredExtension) {
+        return { captured: false, reason: 'Static resource (file extension)' }
+      }
+      
+      // Rule 4: Ignore third-party tracking
+      const isIgnoredDomain = mockSmartSanitizer.ignoredDomains.some(domain =>
+        url.includes(domain)
+      )
+      if (isIgnoredDomain) {
+        return { captured: false, reason: 'Third-party tracking domain' }
+      }
+      
+      // Rule 5: Capture API patterns
+      const matchesApiPattern = mockSmartSanitizer.apiPatterns.some(pattern =>
+        url.includes(pattern)
+      )
+      if (matchesApiPattern) {
+        return { captured: true, reason: 'Matches API pattern' }
+      }
+      
+      // Rule 6: Capture mutations
+      if (method !== 'GET' && method !== 'HEAD') {
+        return { captured: true, reason: `HTTP ${method} mutation` }
+      }
+      
+      // Rule 7: Capture own domains
+      const isOwnDomain = mockSmartSanitizer.ownDomains.some(domain =>
+        url.includes(domain)
+      )
+      if (isOwnDomain) {
+        return { captured: true, reason: 'Own domain' }
+      }
+      
+      // Default: ignore
+      return { captured: false, reason: 'No rule matched' }
+    }
+    
+    // Stats
+    let stats = {
+      total: 0,
+      captured: 0,
+      ignored: 0,
+    }
+    
+    function updateStats() {
+      document.getElementById('total-requests').textContent = stats.total
+      document.getElementById('captured-requests').textContent = stats.captured
+      document.getElementById('ignored-requests').textContent = stats.ignored
+      const reduction = stats.total > 0 
+        ? Math.round((stats.ignored / stats.total) * 100) 
+        : 0
+      document.getElementById('data-reduction').textContent = reduction + '%'
+    }
+    
+    function addLog(message, type = 'info') {
+      const log = document.getElementById('log')
+      if (log.children.length === 1 && log.children[0].textContent.includes('Click buttons')) {
+        log.innerHTML = ''
+      }
+      
+      const entry = document.createElement('div')
+      entry.className = `log-entry ${type}`
+      entry.textContent = message
+      log.appendChild(entry)
+      log.scrollTop = log.scrollHeight
+    }
+    
+    window.testRequest = async function(url, method = 'GET', description = '') {
+      stats.total++
+      
+      addLog(`🔄 Testing: ${description || url}`, 'info')
+      
+      try {
+        const response = await fetch(url, { method, mode: 'no-cors' })
+        const status = response.status || 200 // no-cors returns 0
+        
+        const result = shouldCapture(url, method, status)
+        
+        if (result.captured) {
+          stats.captured++
+          addLog(
+            `✅ CAPTURED: ${method} ${url} (${status}) - Reason: ${result.reason}`,
+            status >= 400 ? 'failure' : 'captured'
+          )
+        } else {
+          stats.ignored++
+          addLog(
+            `❌ IGNORED: ${method} ${url} (${status}) - Reason: ${result.reason}`,
+            'ignored'
+          )
+        }
+      } catch (error) {
+        // CORS error or network failure
+        const result = shouldCapture(url, method, 500)
+        
+        if (result.captured) {
+          stats.captured++
+          addLog(
+            `✅ CAPTURED: ${method} ${url} (CORS/Network error) - Reason: ${result.reason}`,
+            'failure'
+          )
+        } else {
+          stats.ignored++
+          addLog(
+            `❌ IGNORED: ${method} ${url} (CORS/Network error) - Reason: ${result.reason}`,
+            'ignored'
+          )
+        }
+      }
+      
+      updateStats()
+    }
+    
+    window.simulateCheckoutFlow = async function() {
+      addLog('🛒 Starting E-commerce checkout simulation...', 'info')
+      
+      const requests = [
+        { url: 'https://jsonplaceholder.typicode.com/users/1', method: 'GET', desc: 'Get user profile' },
+        { url: 'https://jsonplaceholder.typicode.com/posts', method: 'GET', desc: 'Get products' },
+        { url: 'https://cdn.example.com/product-image.jpg', method: 'GET', desc: 'Load product image' },
+        { url: 'https://www.google-analytics.com/collect', method: 'POST', desc: 'GA tracking' },
+        { url: 'https://jsonplaceholder.typicode.com/posts', method: 'POST', desc: 'Add to cart' },
+        { url: 'https://jsonplaceholder.typicode.com/users/1', method: 'PUT', desc: 'Update cart' },
+        { url: 'https://jsonplaceholder.typicode.com/posts/999', method: 'GET', desc: 'Check inventory (404)' },
+      ]
+      
+      for (const req of requests) {
+        await testRequest(req.url, req.method, req.desc)
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+      
+      addLog('✅ Checkout flow simulation complete', 'info')
+    }
+    
+    window.clearLog = function() {
+      document.getElementById('log').innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Log cleared. Click buttons to test.</div>'
+      stats = { total: 0, captured: 0, ignored: 0 }
+      updateStats()
+    }
+    
+    // Initial message
+    addLog('🚀 Smart Network Sanitizer Demo Ready', 'info')
+    addLog('ℹ️  Configuration: API patterns: /api/, /graphql, /posts', 'info')
+    addLog('ℹ️  Own domains: jsonplaceholder.typicode.com', 'info')
+    addLog('ℹ️  Ignored domains: Google Analytics, Google Fonts, etc.', 'info')
+  </script>
+</body>
+</html>
